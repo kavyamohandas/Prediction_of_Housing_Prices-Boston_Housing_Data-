@@ -1,0 +1,83 @@
+---
+title: "Boston Housing Project"
+author: "Kavya Mohandas"
+date: "27/05/2020"
+output: html_document
+   
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(caret)
+library(neuralnet)
+library(tidyverse)
+library(MASS)
+```
+
+```{r}
+data <- ("Boston")
+df <- Boston
+str(df)
+
+
+
+```
+
+```{r}
+?Boston
+
+hist(df$age, col= "green")
+summary(df)
+```
+
+
+
+
+```{r}
+nrow(df)
+rows <- sample(1:nrow(df), nrow(df) * .8 , replace = F)
+head(rows)
+
+train_base <- df[rows ,]
+test_base <- df[-rows ,]
+dim(train_base)
+dim(test_base)
+```
+
+```{r}
+rows2 <- createDataPartition(df$age,times=1, p=0.8, list= F )
+training <- df[rows2, ]
+testing <- df[-rows2 ,]
+
+dim(training)
+dim(testing)
+```
+
+```{r}
+model_lm <- train(age ~ ., data = training, method= "lm" ,trControl = trainControl(method =  "repeatedcv", number =2 ,repeats =2))
+
+model_rf <-train(age ~ ., data = training, method= "ranger" ,trControl = trainControl(method =  "repeatedcv", number =2 ,repeats =2))
+
+model_gbm <- train(age ~ ., data = training, method= "gbm" ,trControl = trainControl(method =  "repeatedcv", number =2 ,repeats =2))
+
+
+```
+
+
+
+
+
+```{r}
+sample <- resamples(list(Linear = model_lm, Forest = model_rf , GBM = model_gbm))
+
+bwplot(sample)
+dotplot(sample)
+
+summary(sample)
+```
+
+We observe that the RMSE (Root Mean Square Error) value for GBM is the least . 
+So, we should use GBM model for better results.
